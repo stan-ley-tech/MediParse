@@ -25,10 +25,10 @@ public class Document {
     @Column(name = "uploaded_by", nullable = false)
     private UUID uploadedBy;
 
-    @Column(name = "original_filename", nullable = false)
+    @Column(name = "original_filename", nullable = false, length = 512)
     private String originalFilename;
 
-    @Column(name = "content_type", nullable = false)
+    @Column(name = "content_type", nullable = false, length = 128)
     private String contentType;
 
     @Column(name = "file_size_bytes", nullable = false)
@@ -37,15 +37,15 @@ public class Document {
     @Column(name = "file_hash", nullable = false, length = 64)
     private String fileHash;
 
-    @Column(name = "storage_path", nullable = false)
+    @Column(name = "storage_path", nullable = false, length = 1024)
     private String storagePath;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "document_type", nullable = false)
+    @Column(name = "document_type", nullable = false, length = 32)
     private DocumentType documentType = DocumentType.UNKNOWN;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 32)
     private DocumentStatus status = DocumentStatus.UPLOADED;
 
     @Column(name = "version_number", nullable = false)
@@ -58,7 +58,7 @@ public class Document {
     @Column(name = "version_group_id", nullable = false)
     private UUID versionGroupId;
 
-    @Column(name = "processing_error")
+    @Column(name = "processing_error", columnDefinition = "text")
     private String processingError;
 
     @Column(name = "processing_attempts", nullable = false)

@@ -22,18 +22,19 @@ public class AuditLog {
     private UUID actorUserId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 64)
     private AuditAction action;
 
-    @Column(name = "resource_type", nullable = false)
+    @Column(name = "resource_type", nullable = false, length = 64)
     private String resourceType;
 
-    @Column(name = "resource_id")
+    @Column(name = "resource_id", length = 64)
     private String resourceId;
 
+    @Column(length = 1024)
     private String detail;
 
-    @Column(name = "ip_address")
+    @Column(name = "ip_address", length = 64)
     private String ipAddress;
 
     @Column(name = "created_at", nullable = false, updatable = false)

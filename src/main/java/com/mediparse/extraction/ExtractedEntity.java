@@ -23,25 +23,29 @@ public class ExtractedEntity {
     private UUID documentId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "entity_type", nullable = false)
+    @Column(name = "entity_type", nullable = false, length = 32)
     private EntityType entityType;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
     private String label;
 
+    @Column(length = 512)
     private String value;
 
-    @Column(name = "numeric_value")
+    @Column(name = "numeric_value", precision = 12, scale = 4)
     private BigDecimal numericValue;
 
+    @Column(length = 32)
     private String unit;
 
-    @Column(name = "reference_range")
+    @Column(name = "reference_range", length = 64)
     private String referenceRange;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 16)
     private ResultStatus status;
 
+    @Column(precision = 3, scale = 2)
     private BigDecimal confidence = BigDecimal.ONE;
 
     @Column(name = "created_at", nullable = false, updatable = false)

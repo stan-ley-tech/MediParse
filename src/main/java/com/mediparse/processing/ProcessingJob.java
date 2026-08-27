@@ -24,7 +24,7 @@ public class ProcessingJob {
     private UUID documentId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 32)
     private ProcessingJobStatus status = ProcessingJobStatus.PENDING;
 
     @Column(nullable = false)
@@ -33,7 +33,7 @@ public class ProcessingJob {
     @Column(name = "max_attempts", nullable = false)
     private int maxAttempts;
 
-    @Column(name = "last_error")
+    @Column(name = "last_error", columnDefinition = "text")
     private String lastError;
 
     @Column(name = "created_at", nullable = false, updatable = false)

@@ -22,15 +22,16 @@ public class Patient {
     private UUID id;
 
     /** Medical record number — the human-facing identifier clinicians actually use. */
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 64)
     private String mrn;
 
-    @Column(name = "full_name", nullable = false)
+    @Column(name = "full_name", nullable = false, length = 255)
     private String fullName;
 
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
+    @Column(length = 16)
     private String sex;
 
     @Column(name = "created_by")

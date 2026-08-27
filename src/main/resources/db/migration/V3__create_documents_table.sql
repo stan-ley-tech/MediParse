@@ -5,7 +5,7 @@ CREATE TABLE documents (
     original_filename       VARCHAR(512) NOT NULL,
     content_type            VARCHAR(128) NOT NULL,
     file_size_bytes         BIGINT NOT NULL,
-    file_hash               CHAR(64) NOT NULL,
+    file_hash               VARCHAR(64) NOT NULL,
     storage_path            VARCHAR(1024) NOT NULL,
     document_type           VARCHAR(32) NOT NULL DEFAULT 'UNKNOWN',
     status                  VARCHAR(32) NOT NULL DEFAULT 'UPLOADED',
