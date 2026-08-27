@@ -1,6 +1,7 @@
 package com.mediparse.search;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.mediparse.config.OpenSearchProperties;
 import org.apache.hc.client5.http.auth.AuthScope;
@@ -59,7 +60,11 @@ public class OpenSearchClientConfig {
         // The client's internal Jackson mapper is independent of Spring's own
         // ObjectMapper and doesn't register JSR-310 by default, so java.time
         // types (e.g. IndexedDocument.createdAt) fail to serialize without this.
-        ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        // Dates must also come out as ISO-8601 strings, not the default numeric
+        // timestamp — OpenSearch's "date" field type rejects the latter.
+        ObjectMapper objectMapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         builder.setMapper(new JacksonJsonpMapper(objectMapper));
 
         OpenSearchTransport transport = builder.build();
