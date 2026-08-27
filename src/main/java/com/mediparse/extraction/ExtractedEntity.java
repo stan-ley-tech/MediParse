@@ -45,7 +45,7 @@ public class ExtractedEntity {
     @Column(length = 16)
     private ResultStatus status;
 
-    @Column(precision = 3, scale = 2)
+    @Column(nullable = false, precision = 3, scale = 2)
     private BigDecimal confidence = BigDecimal.ONE;
 
     @Column(name = "created_at", nullable = false, updatable = false)

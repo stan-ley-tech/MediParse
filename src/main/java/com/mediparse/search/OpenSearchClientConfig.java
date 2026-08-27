@@ -1,5 +1,7 @@
 package com.mediparse.search;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.mediparse.config.OpenSearchProperties;
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
@@ -11,6 +13,7 @@ import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.nio.ssl.TlsStrategy;
 import org.apache.hc.core5.ssl.SSLContextBuilder;
 import org.apache.hc.core5.ssl.TrustStrategy;
+import org.opensearch.client.json.jackson.JacksonJsonpMapper;
 import org.opensearch.client.opensearch.OpenSearchClient;
 import org.opensearch.client.transport.OpenSearchTransport;
 import org.opensearch.client.transport.httpclient5.ApacheHttpClient5TransportBuilder;
@@ -52,6 +55,12 @@ public class OpenSearchClientConfig {
                 return httpClientBuilder;
             });
         }
+
+        // The client's internal Jackson mapper is independent of Spring's own
+        // ObjectMapper and doesn't register JSR-310 by default, so java.time
+        // types (e.g. IndexedDocument.createdAt) fail to serialize without this.
+        ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        builder.setMapper(new JacksonJsonpMapper(objectMapper));
 
         OpenSearchTransport transport = builder.build();
         return new OpenSearchClient(transport);
