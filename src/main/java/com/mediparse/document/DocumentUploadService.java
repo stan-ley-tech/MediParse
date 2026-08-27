@@ -8,8 +8,12 @@ import com.mediparse.processing.ProcessingJobPublisher;
 import com.mediparse.processing.ProcessingJobRepository;
 import com.mediparse.search.DocumentIndexer;
 import com.mediparse.security.CurrentUserService;
+import com.mediparse.user.Role;
+import com.mediparse.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -105,6 +109,14 @@ public class DocumentUploadService {
         documentAccessService.checkCanView(currentUserService.require(), document);
         auditLogService.record(currentUserService.require().getId(), AuditAction.VIEW, "document", id.toString(), null);
         return document;
+    }
+
+    public Page<Document> listByPatient(UUID patientId, Pageable pageable) {
+        User actor = currentUserService.require();
+        if (actor.getRole() == Role.STAFF) {
+            return documentRepository.findByPatientIdAndUploadedBy(patientId, actor.getId(), pageable);
+        }
+        return documentRepository.findByPatientId(patientId, pageable);
     }
 
     public List<Document> getVersionHistory(UUID id) {

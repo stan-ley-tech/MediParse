@@ -17,4 +17,6 @@ public interface DocumentRepository extends JpaRepository<Document, UUID> {
     Page<Document> findByUploadedBy(UUID uploadedBy, Pageable pageable);
 
     Page<Document> findByPatientId(UUID patientId, Pageable pageable);
+
+    Page<Document> findByPatientIdAndUploadedBy(UUID patientId, UUID uploadedBy, Pageable pageable);
 }

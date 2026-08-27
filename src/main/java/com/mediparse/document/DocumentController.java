@@ -17,14 +17,11 @@ import java.util.UUID;
 public class DocumentController {
 
     private final DocumentUploadService documentUploadService;
-    private final DocumentRepository documentRepository;
     private final SignedUrlService signedUrlService;
 
     public DocumentController(DocumentUploadService documentUploadService,
-                               DocumentRepository documentRepository,
                                SignedUrlService signedUrlService) {
         this.documentUploadService = documentUploadService;
-        this.documentRepository = documentRepository;
         this.signedUrlService = signedUrlService;
     }
 
@@ -53,7 +50,7 @@ public class DocumentController {
 
     @GetMapping
     public Page<DocumentResponse> byPatient(@RequestParam UUID patientId, Pageable pageable) {
-        return documentRepository.findByPatientId(patientId, pageable).map(DocumentResponse::from);
+        return documentUploadService.listByPatient(patientId, pageable).map(DocumentResponse::from);
     }
 
     @PostMapping("/{id}/download-url")

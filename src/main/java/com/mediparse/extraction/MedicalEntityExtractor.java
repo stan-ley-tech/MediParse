@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,23 +50,23 @@ public class MedicalEntityExtractor {
         return results;
     }
 
-    private java.util.Optional<ExtractedEntityDraft> parseLine(String line) {
+    private Optional<ExtractedEntityDraft> parseLine(String line) {
         Matcher labResult = LAB_RESULT.matcher(line);
         if (labResult.find()) {
-            return java.util.Optional.of(toLabResult(labResult));
+            return Optional.of(toLabResult(labResult));
         }
 
         Matcher labeledField = LABELED_FIELD.matcher(line);
         if (labeledField.find()) {
-            return java.util.Optional.of(toLabeledField(labeledField));
+            return Optional.of(toLabeledField(labeledField));
         }
 
         Matcher medication = MEDICATION_LINE.matcher(line);
         if (medication.find()) {
-            return java.util.Optional.of(toMedication(medication));
+            return Optional.of(toMedication(medication));
         }
 
-        return java.util.Optional.empty();
+        return Optional.empty();
     }
 
     private ExtractedEntityDraft toLabResult(Matcher m) {
