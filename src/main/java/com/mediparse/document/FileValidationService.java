@@ -6,7 +6,7 @@ import org.apache.tika.Tika;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.nio.file.Path;
+import java.io.InputStream;
 
 /**
  * Guards against two distinct problems: obviously wrong uploads (wrong
@@ -43,15 +43,16 @@ public class FileValidationService {
     }
 
     /**
-     * Confirms the bytes actually written to disk match what the extension
-     * claims. Tika only reads the file's leading bytes to do this, so it
-     * stays cheap regardless of file size.
+     * Confirms the file's actual bytes match what its extension claims.
+     * Tika only reads the leading header bytes off the stream to do this,
+     * so it stays cheap regardless of file size and works the same whether
+     * the bytes come from disk, memory or eventually an object store.
      */
-    public void validateContent(Path storedFile, String originalFilename) {
+    public void validateContent(InputStream content, String originalFilename) {
         String extension = Filenames.extensionWithoutDot(originalFilename);
         String detectedMimeType;
         try {
-            detectedMimeType = tika.detect(storedFile);
+            detectedMimeType = tika.detect(content);
         } catch (IOException e) {
             throw new BadRequestException("Could not read the uploaded file to verify its contents");
         }
