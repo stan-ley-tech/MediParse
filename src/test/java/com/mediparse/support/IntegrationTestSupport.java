@@ -5,57 +5,56 @@ import com.mediparse.auth.LoginRequest;
 import com.mediparse.user.Role;
 import com.mediparse.user.User;
 import com.mediparse.user.UserRepository;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
 
 /**
  * Shared Testcontainers setup for tests that need the real stack rather than
- * mocks. Containers are held in static fields so every subclass in the same
- * JVM reuses the same three containers instead of paying startup cost per
- * test class.
+ * mocks. These are "singleton containers" (see Testcontainers' own pattern
+ * for this): started once in a static initializer and never stopped by us —
+ * deliberately NOT annotated with {@code @Container}, because that lifecycle
+ * is scoped per test class and would tear the containers down after the
+ * first IT class finishes, leaving every other class unable to connect.
+ * The JVM shutdown hook Testcontainers installs (via Ryuk) cleans them up
+ * when the test run ends.
  */
-@Testcontainers
-@ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public abstract class IntegrationTestSupport {
 
-    @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(DockerImageName.parse("postgres:16-alpine"))
-            .withDatabaseName("mediparse")
-            .withUsername("mediparse")
-            .withPassword("mediparse");
+    static final PostgreSQLContainer<?> POSTGRES;
+    static final RabbitMQContainer RABBITMQ;
+    static final GenericContainer<?> OPENSEARCH;
 
-    @Container
-    static final RabbitMQContainer RABBITMQ = new RabbitMQContainer(DockerImageName.parse("rabbitmq:3.13-management-alpine"));
+    static {
+        POSTGRES = new PostgreSQLContainer<>(DockerImageName.parse("postgres:16-alpine"))
+                .withDatabaseName("mediparse")
+                .withUsername("mediparse")
+                .withPassword("mediparse");
+        POSTGRES.start();
 
-    // A plain GenericContainer with the security plugin disabled, rather than the
-    // opensearch-testcontainers module's own wrapper — this keeps test setup on
-    // plain HTTP instead of fighting the bundled self-signed certificate, which
-    // the Docker Compose stack (see docs/security.md) accepts as a dev-only tradeoff.
-    @Container
-    static final GenericContainer<?> OPENSEARCH =
-            new GenericContainer<>(DockerImageName.parse("opensearchproject/opensearch:2.15.0"))
-                    .withExposedPorts(9200)
-                    .withEnv("discovery.type", "single-node")
-                    .withEnv("DISABLE_SECURITY_PLUGIN", "true")
-                    .withEnv("OPENSEARCH_JAVA_OPTS", "-Xms512m -Xmx512m")
-                    .waitingFor(Wait.forHttp("/_cluster/health").forStatusCode(200)
-                            .withStartupTimeout(Duration.ofMinutes(3)));
+        RABBITMQ = new RabbitMQContainer(DockerImageName.parse("rabbitmq:3.13-management-alpine"));
+        RABBITMQ.start();
+
+        OPENSEARCH = new GenericContainer<>(DockerImageName.parse("opensearchproject/opensearch:2.15.0"))
+                .withExposedPorts(9200)
+                .withEnv("discovery.type", "single-node")
+                .withEnv("DISABLE_SECURITY_PLUGIN", "true")
+                .withEnv("OPENSEARCH_JAVA_OPTS", "-Xms512m -Xmx512m")
+                .waitingFor(Wait.forHttp("/_cluster/health").forStatusCode(200)
+                        .withStartupTimeout(Duration.ofMinutes(3)));
+        OPENSEARCH.start();
+    }
 
     @DynamicPropertySource
     static void registerProperties(DynamicPropertyRegistry registry) {
