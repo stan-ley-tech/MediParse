@@ -1,0 +1,94 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mediparse-postgres
+    environment:
+      POSTGRES_DB: mediparse
+      POSTGRES_USER: mediparse
+      POSTGRES_PASSWORD: mediparse
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mediparse -d mediparse"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: mediparse-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: mediparse
+      RABBITMQ_DEFAULT_PASS: mediparse
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  opensearch:
+    image: opensearchproject/opensearch:2.15.0
+    container_name: mediparse-opensearch
+    environment:
+      discovery.type: single-node
+      bootstrap.memory_lock: "true"
+      OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx512m"
+      OPENSEARCH_INITIAL_ADMIN_PASSWORD: ${OPENSEARCH_ADMIN_PASSWORD:-MediParse!2026}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sk -u admin:${OPENSEARCH_ADMIN_PASSWORD:-MediParse!2026} https://localhost:9200/_cluster/health | grep -q '\"status\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mediparse-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      opensearch:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediparse
+      DB_USER: mediparse
+      DB_PASSWORD: mediparse
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: mediparse
+      RABBITMQ_PASSWORD: mediparse
+      OPENSEARCH_HOST: opensearch
+      OPENSEARCH_PORT: 9200
+      OPENSEARCH_SCHEME: https
+      OPENSEARCH_USER: admin
+      OPENSEARCH_PASSWORD: ${OPENSEARCH_ADMIN_PASSWORD:-MediParse!2026}
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-every-non-local-environment-32bytes-minimum}
+      DOWNLOAD_SIGNING_SECRET: ${DOWNLOAD_SIGNING_SECRET:-change-me-in-every-non-local-environment}
+      STORAGE_ROOT: /data/storage
+    ports:
+      - "8080:8080"
+    volumes:
+      - app_storage:/data/storage
+
+volumes:
+  pg_data:
+  opensearch_data:
+  app_storage:
