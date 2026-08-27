@@ -1,0 +1,10 @@
+target/
+storage/
+data/
+.git/
+.github/
+docs/
+test-data/
+*.md
+.idea/
+.vscode/

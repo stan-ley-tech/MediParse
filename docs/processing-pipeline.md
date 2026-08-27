@@ -96,7 +96,7 @@ that split, a worker could receive the message and query for a document that
   the job already claimed and is a no-op.
 
 **Concurrency.** Several listener threads
-(`mediparse.rabbitmq.listener.simple.concurrency`) consume the same queue.
+(`spring.rabbitmq.listener.simple.concurrency`) consume the same queue.
 The claim step above is what makes that safe — two threads racing to handle
 the same job will only ever have one of them win the `UPDATE`.
 
