@@ -1,0 +1,22 @@
+GREEN VALLEY MEDICAL CENTER
+DISCHARGE SUMMARY
+
+Patient: Grace Achieng
+Doctor: Dr. Samuel Mwangi
+Facility: Green Valley Medical Center
+Date: 2026-07-30
+
+Date of Admission: 2026-07-25
+Date of Discharge: 2026-07-30
+
+Hospital Course: Patient was admitted for management of community-acquired
+pneumonia and responded well to intravenous antibiotics.
+
+Diagnosis: Community-acquired pneumonia
+
+Discharge Medications:
+Azithromycin 250mg - take once daily for 3 days
+
+Allergy: None known
+
+Follow-up: Review in outpatient clinic in two weeks.
