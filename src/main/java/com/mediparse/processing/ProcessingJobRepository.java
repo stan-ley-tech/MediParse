@@ -22,4 +22,6 @@ public interface ProcessingJobRepository extends JpaRepository<ProcessingJob, UU
             "j.startedAt = CURRENT_TIMESTAMP, j.attempts = j.attempts + 1 " +
             "where j.id = :id and j.status = com.mediparse.processing.ProcessingJobStatus.PENDING")
     int claim(@Param("id") UUID id);
+
+    void deleteByDocumentId(UUID documentId);
 }

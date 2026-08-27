@@ -5,6 +5,8 @@ import com.mediparse.audit.AuditLogService;
 import com.mediparse.common.BadRequestException;
 import com.mediparse.common.NotFoundException;
 import com.mediparse.processing.ProcessingJobPublisher;
+import com.mediparse.processing.ProcessingJobRepository;
+import com.mediparse.search.DocumentIndexer;
 import com.mediparse.security.CurrentUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +33,8 @@ public class DocumentUploadService {
     private final AuditLogService auditLogService;
     private final CurrentUserService currentUserService;
     private final DocumentAccessService documentAccessService;
+    private final DocumentIndexer documentIndexer;
+    private final ProcessingJobRepository processingJobRepository;
 
     public DocumentUploadService(DocumentRepository documentRepository,
                                   DocumentStorageService storageService,
@@ -38,7 +42,9 @@ public class DocumentUploadService {
                                   ProcessingJobPublisher processingJobPublisher,
                                   AuditLogService auditLogService,
                                   CurrentUserService currentUserService,
-                                  DocumentAccessService documentAccessService) {
+                                  DocumentAccessService documentAccessService,
+                                  DocumentIndexer documentIndexer,
+                                  ProcessingJobRepository processingJobRepository) {
         this.documentRepository = documentRepository;
         this.storageService = storageService;
         this.fileValidationService = fileValidationService;
@@ -46,6 +52,8 @@ public class DocumentUploadService {
         this.auditLogService = auditLogService;
         this.currentUserService = currentUserService;
         this.documentAccessService = documentAccessService;
+        this.documentIndexer = documentIndexer;
+        this.processingJobRepository = processingJobRepository;
     }
 
     @Transactional
@@ -112,6 +120,8 @@ public class DocumentUploadService {
         documentAccessService.checkCanDelete(actor, document);
 
         deleteQuietly(document.getStoragePath());
+        documentIndexer.delete(document.getId());
+        processingJobRepository.deleteByDocumentId(document.getId());
         documentRepository.delete(document);
         auditLogService.record(actor.getId(), AuditAction.DELETE, "document", id.toString(), document.getOriginalFilename());
     }
