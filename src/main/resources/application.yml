@@ -1,0 +1,86 @@
+spring:
+  application:
+    name: mediparse
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:mediparse}
+    username: ${DB_USER:mediparse}
+    password: ${DB_PASSWORD:mediparse}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:10}
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 25
+        order_inserts: true
+        order_updates: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:mediparse}
+    password: ${RABBITMQ_PASSWORD:mediparse}
+    listener:
+      simple:
+        concurrency: ${RABBITMQ_CONSUMERS:3}
+        max-concurrency: ${RABBITMQ_MAX_CONSUMERS:6}
+        prefetch: 1
+        default-requeue-rejected: false
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: ${MAX_UPLOAD_SIZE:50MB}
+      max-request-size: ${MAX_UPLOAD_SIZE:50MB}
+      file-size-threshold: 2KB
+
+server:
+  port: ${SERVER_PORT:8080}
+  tomcat:
+    max-swallow-size: ${MAX_UPLOAD_SIZE:50MB}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+mediparse:
+  jwt:
+    secret: ${JWT_SECRET:dev-only-secret-please-override-in-every-real-environment-32bytes+}
+    access-token-ttl-minutes: ${JWT_ACCESS_TTL_MINUTES:30}
+    refresh-token-ttl-minutes: ${JWT_REFRESH_TTL_MINUTES:1440}
+  storage:
+    root-path: ${STORAGE_ROOT:./storage}
+    max-file-size-bytes: ${MAX_UPLOAD_SIZE_BYTES:52428800}
+    allowed-extensions: pdf,docx,txt
+  download:
+    signing-secret: ${DOWNLOAD_SIGNING_SECRET:dev-only-signing-secret-please-override}
+    url-ttl-seconds: ${DOWNLOAD_URL_TTL_SECONDS:300}
+  opensearch:
+    host: ${OPENSEARCH_HOST:localhost}
+    port: ${OPENSEARCH_PORT:9200}
+    scheme: ${OPENSEARCH_SCHEME:http}
+    username: ${OPENSEARCH_USER:}
+    password: ${OPENSEARCH_PASSWORD:}
+    documents-index: documents
+  processing:
+    max-attempts: ${PROCESSING_MAX_ATTEMPTS:3}
+    text-extraction-char-limit: ${TEXT_EXTRACTION_CHAR_LIMIT:2000000}
+
+logging:
+  level:
+    com.mediparse: ${LOG_LEVEL:INFO}
