@@ -1,0 +1,34 @@
+# Build output
+target/
+*.class
+
+# Logs
+*.log
+logs/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment / secrets
+.env
+.env.*
+*.pem
+*.p12
+*.jks
+
+# Local storage used by the document store in dev
+storage/
+data/
+
+# Maven wrapper cache (not committed, project builds via Docker)
+.mvn/wrapper/maven-wrapper.jar
